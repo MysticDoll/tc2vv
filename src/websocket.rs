@@ -101,11 +101,18 @@ pub(crate) async fn handle_connection(peer_map: crate::PeerMap, raw_stream: TcpS
     let ws_stream = accept_async(raw_stream).await.unwrap();
 
     let (tx, rx) = unbounded();
+    let ping_tx = tx.clone();
     peer_map.lock().unwrap().insert(addr, tx);
 
     let (outgoing, incoming) = ws_stream.split();
 
     let receive = rx.map(Ok).forward(outgoing);
+    tokio::spawn(async move {
+        loop {
+            ping_tx.unbounded_send(Message::Ping(vec![0u8])).unwrap();
+            tokio::time::sleep(tokio::time::Duration::from_millis(20000)).await;
+        }
+    });
 
     pin_mut!(receive);
     receive.await;

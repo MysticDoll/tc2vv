@@ -31,6 +31,7 @@ async fn main() -> Result<(), String>{
     let listener = crate::websocket::create_listener(&server_addr).await;
     let state = PeerMap::new(Mutex::new(HashMap::new()));
     let state_server = state.clone();
+    let state_ping = state.clone();
     let server_handle = tokio::spawn(async move{
         while let Ok((stream, addr)) = listener.accept().await {
             tokio::spawn(crate::websocket::handle_connection(state_server.clone(), stream, addr));
