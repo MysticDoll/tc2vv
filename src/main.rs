@@ -7,7 +7,6 @@ use std::{
 use tokio_tungstenite::{accept_async, connect_async, tungstenite::protocol::Message};
 use futures_channel::mpsc::{unbounded, UnboundedSender};
 use futures_util::{SinkExt, StreamExt};
-use tokio::join;
 use url::Url;
 
 
@@ -40,7 +39,14 @@ async fn main() -> Result<(), String>{
 
     let chat_handle = tokio::spawn(crate::websocket::handle_chat(write, read, state.clone()));
 
-    join!(chat_handle, server_handle);
+    tokio::select! {
+      _ = chat_handle => {
+            println!("chat handler has been finished unexepextedly")
+        }
+      _ = server_handle => {
+            println!("server handler has been finished unexepextedly")
+        }
+    };
 
     Err("WebSocket closed".to_owned())
 }

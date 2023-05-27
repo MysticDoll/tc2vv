@@ -78,7 +78,9 @@ pub(crate) async fn handle_chat(
                                 let peers = peer_map.lock().unwrap();
 
                                 for (_, sink) in peers.iter() {
-                                    sink.unbounded_send(Message::Text(query.clone())).unwrap();
+                                    if let Err(e) = sink.unbounded_send(Message::Text(query.clone())) {
+                                        eprintln!("error occured when sending message to client: {:?}", e);
+                                    };
                                 }
                             }
                     };
