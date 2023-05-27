@@ -2,6 +2,8 @@ name: Deploy Docker image on tagging.
 
 on:
   push:
+    branch:
+      - main
     tags:
       - '*'
   workflow_dispatch:
